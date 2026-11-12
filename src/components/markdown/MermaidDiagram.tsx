@@ -2,6 +2,7 @@ import { useEffect, useId, useState } from "react";
 import { TransformComponent, TransformWrapper, useControls } from "react-zoom-pan-pinch";
 import { Maximize2, Minus, Plus, RotateCcw } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { useI18n } from "@/lib/locale";
 
 let mermaidPromise: Promise<typeof import("mermaid").default> | null = null;
 function loadMermaid() {
@@ -20,11 +21,12 @@ function loadMermaid() {
 
 function Controls() {
   const { zoomIn, zoomOut, resetTransform } = useControls();
+  const { t } = useI18n();
   return (
     <div className="mermaid-controls">
-      <button type="button" onClick={() => zoomIn()} aria-label="Увеличить"><Plus /></button>
-      <button type="button" onClick={() => zoomOut()} aria-label="Уменьшить"><Minus /></button>
-      <button type="button" onClick={() => resetTransform()} aria-label="Сбросить масштаб"><RotateCcw /></button>
+      <button type="button" onClick={() => zoomIn()} aria-label={t.zoomIn}><Plus /></button>
+      <button type="button" onClick={() => zoomOut()} aria-label={t.zoomOut}><Minus /></button>
+      <button type="button" onClick={() => resetTransform()} aria-label={t.resetZoom}><RotateCcw /></button>
     </div>
   );
 }
@@ -45,6 +47,7 @@ export function MermaidDiagram({ code }: { code: string }) {
   const [svg, setSvg] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
+  const { t } = useI18n();
 
   useEffect(() => {
     let cancelled = false;
@@ -60,26 +63,26 @@ export function MermaidDiagram({ code }: { code: string }) {
   return (
     <div className="code-block mermaid-block">
       <div className="code-block__bar">
-        <span>Диаграмма</span>
+        <span>{t.diagram}</span>
         {svg && (
           <button type="button" onClick={() => setOpen(true)}>
-            <Maximize2 className="size-3.5" /> На весь экран
+            <Maximize2 className="size-3.5" /> {t.fullscreen}
           </button>
         )}
       </div>
       {error ? (
         <div className="mermaid-error">
-          <p>Ошибка в диаграмме: {error}</p>
+          <p>{t.diagramError(error)}</p>
           <pre>{code}</pre>
         </div>
       ) : svg ? (
         <ZoomableSvg svg={svg} wheel={false} />
       ) : (
-        <div className="mermaid-viewport mermaid-loading">Рисуем диаграмму…</div>
+        <div className="mermaid-viewport mermaid-loading">{t.drawingDiagram}</div>
       )}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="mermaid-dialog">
-          <DialogTitle className="sr-only">Диаграмма</DialogTitle>
+          <DialogTitle className="sr-only">{t.diagram}</DialogTitle>
           {svg && <ZoomableSvg svg={svg} wheel />}
         </DialogContent>
       </Dialog>

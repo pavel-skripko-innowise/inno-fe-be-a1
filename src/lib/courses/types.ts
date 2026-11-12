@@ -10,8 +10,17 @@ export type Lesson = {
 
 export type CourseModule = { title: string; lessons: Lesson[] };
 
+export type SectionMeta = {
+  id: string;
+  locale: string;
+  title: string;
+  description: string;
+};
+
 export type Course = {
   id: string;
+  locale: string;
+  sectionId: string;
   title: string;
   description: string;
   modules: CourseModule[];
@@ -19,12 +28,15 @@ export type Course = {
 
 export type CourseSummary = {
   id: string;
+  sectionId: string;
   title: string;
   description: string;
   moduleCount: number;
   lessonCount: number;
   firstLessonId: string | null;
 };
+
+export type Section = SectionMeta & { courses: CourseSummary[] };
 
 /** root-relative .md path -> where it lives in the app */
 export type LinkIndex = Record<string, { courseId: string; lessonId: string }>;

@@ -7,6 +7,7 @@ import { Link } from "@tanstack/react-router";
 import { Check, Copy, ExternalLink } from "lucide-react";
 import { resolveLink } from "@/lib/courses/links";
 import type { LinkIndex } from "@/lib/courses/types";
+import { useI18n } from "@/lib/locale";
 import { MermaidDiagram } from "./MermaidDiagram";
 
 const LANG_LABEL: Record<string, string> = {
@@ -19,6 +20,7 @@ const LANG_LABEL: Record<string, string> = {
 function CodeBlock({ children }: { children?: ReactNode }) {
   const ref = useRef<HTMLPreElement>(null);
   const [copied, setCopied] = useState(false);
+  const { t } = useI18n();
   const className =
     isValidElement<{ className?: string }>(children) ? (children.props.className ?? "") : "";
   const lang = className.match(/language-([\w+-]+)/)?.[1];
@@ -34,10 +36,10 @@ function CodeBlock({ children }: { children?: ReactNode }) {
   return (
     <div className="code-block">
       <div className="code-block__bar">
-        <span>{lang ? (LANG_LABEL[lang] ?? lang) : "Код"}</span>
-        <button type="button" onClick={copy} aria-label="Скопировать код">
+        <span>{lang ? (LANG_LABEL[lang] ?? lang) : t.code}</span>
+        <button type="button" onClick={copy} aria-label={t.copyCode}>
           {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
-          {copied ? "Скопировано" : "Копировать"}
+          {copied ? t.copied : t.copy}
         </button>
       </div>
       <pre ref={ref}>{children}</pre>
@@ -48,6 +50,7 @@ function CodeBlock({ children }: { children?: ReactNode }) {
 type Props = { markdown: string; path: string; linkIndex: LinkIndex };
 
 export function Markdown({ markdown, path, linkIndex }: Props) {
+  const { t } = useI18n();
   const components: Components = {
     pre: ({ children }) => <CodeBlock>{children}</CodeBlock>,
     table: ({ children }) => (
@@ -79,7 +82,7 @@ export function Markdown({ markdown, path, linkIndex }: Props) {
           );
         default:
           return (
-            <a href={link.href} className="broken-link" title="Файл не найден в курсе">
+            <a href={link.href} className="broken-link" title={t.missingFile}>
               {children}
             </a>
           );

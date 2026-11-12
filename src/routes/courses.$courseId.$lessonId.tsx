@@ -5,21 +5,25 @@ import { Button } from "@/components/ui/button";
 import { Markdown } from "@/components/markdown/Markdown";
 import { TableOfContents } from "@/components/course/TableOfContents";
 import { useCourse } from "@/components/course/CourseContext";
-import { courseQuery } from "@/lib/courses/courses.functions";
+import { courseQuery, resolveLocale } from "@/lib/courses/courses.functions";
 import { flattenLessons } from "@/lib/courses/types";
+import { messagesFor } from "@/lib/i18n";
+import { useI18n } from "@/lib/locale";
 import { useSettings } from "@/lib/settings";
 import { useScrollMemory } from "@/lib/scroll-position";
 
 export const Route = createFileRoute("/courses/$courseId/$lessonId")({
   loader: async ({ context, params }) => {
-    const { course } = await context.queryClient.ensureQueryData(courseQuery(params.courseId));
+    const locale = await resolveLocale(context.queryClient);
+    const { course } = await context.queryClient.ensureQueryData(courseQuery(locale, params.courseId));
     const lesson = flattenLessons(course).find((l) => l.id === params.lessonId);
     if (!lesson) throw notFound();
-    return { title: lesson.title, course: course.title };
+    return { title: lesson.title, course: course.title, locale };
   },
   head: ({ loaderData }) => {
-    const title = loaderData ? `${loaderData.title} · ${loaderData.course}` : "Урок не найден";
-    const description = loaderData ? `Урок курса «${loaderData.course}»` : "Урок не найден";
+    const t = messagesFor(loaderData?.locale ?? "ru");
+    const title = loaderData ? `${loaderData.title} · ${loaderData.course}` : t.lessonMissing;
+    const description = loaderData ? t.lessonDescription(loaderData.course) : t.lessonMissing;
     return {
       meta: [
         { title },
@@ -31,7 +35,7 @@ export const Route = createFileRoute("/courses/$courseId/$lessonId")({
       ],
     };
   },
-  notFoundComponent: () => <p className="p-10 text-muted-foreground">Урок не найден.</p>,
+  notFoundComponent: LessonMissing,
   component: LessonPage,
 });
 
@@ -54,8 +58,14 @@ function ReadingBar() {
   );
 }
 
+function LessonMissing() {
+  const { t } = useI18n();
+  return <p className="p-10 text-muted-foreground">{t.lessonMissing}</p>;
+}
+
 function LessonPage() {
   const { lessonId } = Route.useParams();
+  const { locale, t } = useI18n();
   const { course, linkIndex, done, toggle } = useCourse();
   const navigate = useNavigate();
   const lessons = flattenLessons(course);
@@ -66,7 +76,7 @@ function LessonPage() {
   const module = course.modules.find((m) => m.lessons.some((l) => l.id === lessonId));
   const isDone = done.has(lessonId);
   const { rememberPosition } = useSettings();
-  useScrollMemory(`${course.id}/${lessonId}`, "lesson", rememberPosition);
+  useScrollMemory(`${locale}/${course.id}/${lessonId}`, "lesson", rememberPosition);
 
   // Arrow keys switch lessons (ignored while typing).
   useEffect(() => {
@@ -104,7 +114,7 @@ function LessonPage() {
               </span>
             </p>
             <Button variant={isDone ? "success" : "outline"} size="sm" onClick={() => toggle(lessonId)}>
-              <Check /> {isDone ? "Пройдено" : "Отметить пройденным"}
+              <Check /> {isDone ? t.done : t.markDone}
             </Button>
           </div>
 
@@ -140,6 +150,7 @@ function PagerLink({
   lesson: { id: string; title: string; number: string };
   dir: "prev" | "next";
 }) {
+  const { t } = useI18n();
   return (
     <Link
       to="/courses/$courseId/$lessonId"
@@ -148,7 +159,7 @@ function PagerLink({
     >
       <span className="flex items-center gap-1 text-xs text-muted-foreground data-[dir=next]:justify-end" data-dir={dir}>
         {dir === "prev" && <ChevronLeft className="size-3.5" />}
-        {dir === "prev" ? "Назад" : "Далее"}
+        {dir === "prev" ? t.back : t.next}
         {dir === "next" && <ChevronRight className="size-3.5" />}
       </span>
       <span className="mt-1 block font-medium group-hover:text-primary">

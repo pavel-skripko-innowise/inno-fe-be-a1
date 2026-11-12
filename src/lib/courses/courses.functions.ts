@@ -1,42 +1,87 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getCookie } from "@tanstack/react-start/server";
 import { notFound } from "@tanstack/react-router";
-import { queryOptions } from "@tanstack/react-query";
-import type { CourseSummary, LinkIndex } from "./types";
+import { queryOptions, type QueryClient } from "@tanstack/react-query";
+import { pickLocale } from "./sections";
+import type { CourseSummary, LinkIndex, SectionMeta } from "./types";
 
-const load = async () => (await import("virtual:courses-content")).courses;
+const load = async () => import("virtual:courses-content");
 
-export const listCourses = createServerFn({ method: "GET" }).handler(
-  async (): Promise<CourseSummary[]> => {
-    const courses = await load();
-    return courses.map((c) => {
-      const lessons = c.modules.flatMap((m) => m.lessons);
-      return {
-        id: c.id,
-        title: c.title,
-        description: c.description,
-        moduleCount: c.modules.length,
-        lessonCount: lessons.length,
-        firstLessonId: lessons[0]?.id ?? null,
-      };
-    });
-  },
-);
+export type Catalog = {
+  locale: string;
+  locales: string[];
+  sections: SectionMeta[];
+  courses: CourseSummary[];
+};
+
+export const listLocales = createServerFn({ method: "GET" }).handler(async (): Promise<string[]> => {
+  return (await load()).locales;
+});
+
+export const readLocale = createServerFn({ method: "GET" }).handler(async () => {
+  try {
+    return getCookie("locale") ?? "";
+  } catch {
+    return "";
+  }
+});
+
+export const localesQuery = () =>
+  queryOptions({ queryKey: ["locales"], queryFn: () => listLocales(), staleTime: Infinity });
+
+export async function resolveLocale(queryClient: QueryClient) {
+  const locales = await queryClient.ensureQueryData(localesQuery());
+  return pickLocale(await readLocale(), locales);
+}
+
+export const getCatalog = createServerFn({ method: "GET" })
+  .inputValidator((locale: string) => locale)
+  .handler(async ({ data: locale }): Promise<Catalog> => {
+    const { courses, sections, locales } = await load();
+    const resolved = pickLocale(locale, locales);
+    return {
+      locale: resolved,
+      locales,
+      sections: sections.filter((section) => section.locale === resolved),
+      courses: courses
+        .filter((course) => course.locale === resolved)
+        .map((course) => {
+          const lessons = course.modules.flatMap((module) => module.lessons);
+          return {
+            id: course.id,
+            sectionId: course.sectionId,
+            title: course.title,
+            description: course.description,
+            moduleCount: course.modules.length,
+            lessonCount: lessons.length,
+            firstLessonId: lessons[0]?.id ?? null,
+          };
+        }),
+    };
+  });
 
 export const getCourse = createServerFn({ method: "GET" })
-  .inputValidator((id: string) => id)
-  .handler(async ({ data: id }) => {
-    const courses = await load();
-    const course = courses.find((c) => c.id === id);
+  .inputValidator((data: { locale: string; id: string }) => data)
+  .handler(async ({ data }) => {
+    const { courses, locales } = await load();
+    const locale = pickLocale(data.locale, locales);
+    const course = courses.find((item) => item.locale === locale && item.id === data.id);
     if (!course) throw notFound();
     const linkIndex: LinkIndex = {};
-    for (const c of courses)
-      for (const m of c.modules)
-        for (const l of m.lessons) linkIndex[l.path] = { courseId: c.id, lessonId: l.id };
+    for (const item of courses) {
+      if (item.locale !== locale) continue;
+      for (const module of item.modules)
+        for (const lesson of module.lessons)
+          linkIndex[lesson.path] = { courseId: item.id, lessonId: lesson.id };
+    }
     return { course, linkIndex };
   });
 
-export const coursesQuery = () =>
-  queryOptions({ queryKey: ["courses"], queryFn: () => listCourses() });
+export const catalogQuery = (locale: string) =>
+  queryOptions({ queryKey: ["catalog", locale], queryFn: () => getCatalog({ data: locale }) });
 
-export const courseQuery = (id: string) =>
-  queryOptions({ queryKey: ["course", id], queryFn: () => getCourse({ data: id }) });
+export const courseQuery = (locale: string, id: string) =>
+  queryOptions({
+    queryKey: ["course", locale, id],
+    queryFn: () => getCourse({ data: { locale, id } }),
+  });

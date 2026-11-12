@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/lib/locale";
 
 type Heading = { id: string; text: string; level: number };
 
@@ -24,11 +25,12 @@ export function TableOfContents({ articleId, deps }: { articleId: string; deps: 
     return () => observer.disconnect();
   }, [articleId, deps]);
 
+  const { t } = useI18n();
   if (headings.length < 2) return null;
   return (
-    <nav aria-label="Содержание урока" className="text-sm">
+    <nav aria-label={t.lessonContents} className="text-sm">
       <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-        На странице
+        {t.onThisPage}
       </p>
       <ul className="space-y-1 border-l border-border">
         {headings.map((h) => (

@@ -3,36 +3,59 @@ import { Bookmark, Moon, Settings2, Sun } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
+import { localeLabel } from "@/lib/i18n";
+import { useI18n } from "@/lib/locale";
 import { updateSettings, useSettings, type Theme } from "@/lib/settings";
 import { clearScrollPositions } from "@/lib/scroll-position";
 
-const THEMES: { value: Theme; label: string; icon: typeof Sun }[] = [
-  { value: "light", label: "Светлая", icon: Sun },
-  { value: "dark", label: "Тёмная", icon: Moon },
+const THEMES: { value: Theme; icon: typeof Sun }[] = [
+  { value: "light", icon: Sun },
+  { value: "dark", icon: Moon },
 ];
 
 export function SettingsMenu() {
-  const { theme, rememberPosition } = useSettings();
+  const { theme, locale, rememberPosition } = useSettings();
+  const { locales, t } = useI18n();
   const [cleared, setCleared] = useState(false);
+  const themeLabel = { light: t.light, dark: t.dark };
 
   return (
     <Popover onOpenChange={() => setCleared(false)}>
       <PopoverTrigger asChild>
         <button
           type="button"
-          aria-label="Настройки"
+          aria-label={t.settings}
           className="fixed right-5 bottom-5 z-50 grid size-11 place-items-center rounded-full border border-border bg-card text-muted-foreground shadow-[var(--shadow-card)] transition hover:rotate-45 hover:text-foreground"
         >
           <Settings2 className="size-5" />
         </button>
       </PopoverTrigger>
       <PopoverContent side="top" align="end" className="w-72 space-y-5">
-        <p className="text-sm font-semibold">Настройки</p>
+        <p className="text-sm font-semibold">{t.settings}</p>
 
         <div className="space-y-2">
-          <p className="text-xs text-muted-foreground">Тема</p>
+          <p className="text-xs text-muted-foreground">{t.language}</p>
           <div className="grid grid-cols-2 gap-1 rounded-lg bg-muted p-1">
-            {THEMES.map(({ value, label, icon: Icon }) => (
+            {locales.map((code) => (
+              <button
+                key={code}
+                type="button"
+                aria-pressed={locale === code}
+                onClick={() => updateSettings({ locale: code })}
+                className={`rounded-md py-1.5 text-sm transition ${
+                  locale === code ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {localeLabel(code)}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <p className="text-xs text-muted-foreground">{t.theme}</p>
+          <div className="grid grid-cols-2 gap-1 rounded-lg bg-muted p-1">
+            {THEMES.map(({ value, icon: Icon }) => (
               <button
                 key={value}
                 type="button"
@@ -41,7 +64,7 @@ export function SettingsMenu() {
                   theme === value ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                <Icon className="size-4" /> {label}
+                <Icon className="size-4" /> {themeLabel[value]}
               </button>
             ))}
           </div>
@@ -51,11 +74,9 @@ export function SettingsMenu() {
           <label className="flex items-start justify-between gap-3">
             <span>
               <span className="flex items-center gap-1.5 text-sm font-medium">
-                <Bookmark className="size-4" /> Сохранять положение
+                <Bookmark className="size-4" /> {t.rememberPosition}
               </span>
-              <span className="mt-0.5 block text-xs text-muted-foreground">
-                Возвращает к месту, где вы остановились на странице
-              </span>
+              <span className="mt-0.5 block text-xs text-muted-foreground">{t.rememberPositionHint}</span>
             </span>
             <Switch
               checked={rememberPosition}
@@ -69,7 +90,7 @@ export function SettingsMenu() {
             disabled={cleared}
             onClick={() => (clearScrollPositions(), setCleared(true))}
           >
-            {cleared ? "Сохранённые положения сброшены" : "Сбросить сохранённые положения"}
+            {cleared ? t.positionsCleared : t.resetPositions}
           </Button>
         </div>
       </PopoverContent>

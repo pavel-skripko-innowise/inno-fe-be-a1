@@ -1,9 +1,10 @@
 import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 import path from "node:path";
+import { coursesContent } from "./courses.plugin";
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), coursesContent()],
   test: {
     environment: "jsdom",
     globals: true,

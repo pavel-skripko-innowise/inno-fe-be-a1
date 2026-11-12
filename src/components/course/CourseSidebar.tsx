@@ -3,6 +3,7 @@ import { Link, useParams } from "@tanstack/react-router";
 import { ArrowLeft, Check, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { flattenLessons } from "@/lib/courses/types";
+import { useI18n } from "@/lib/locale";
 import { useCourse } from "./CourseContext";
 
 function snippet(text: string, q: string) {
@@ -19,6 +20,7 @@ function snippet(text: string, q: string) {
 
 export function CourseSidebar({ onNavigate }: { onNavigate?: () => void }) {
   const { course, done, toggle } = useCourse();
+  const { t } = useI18n();
   const { lessonId } = useParams({ strict: false });
   const [query, setQuery] = useState("");
   const q = query.trim().toLowerCase();
@@ -48,13 +50,13 @@ export function CourseSidebar({ onNavigate }: { onNavigate?: () => void }) {
           to="/"
           className="mb-4 inline-flex items-center gap-1.5 text-xs text-sidebar-foreground/60 hover:text-sidebar-foreground"
         >
-          <ArrowLeft className="size-3.5" /> Все курсы
+          <ArrowLeft className="size-3.5" /> {t.allSections}
         </Link>
         <h2 className="font-display text-lg leading-tight text-sidebar-accent-foreground">
           {course.title}
         </h2>
         <div className="mt-4 flex justify-between text-xs text-sidebar-foreground/60">
-          <span>Прогресс</span>
+          <span>{t.progress}</span>
           <span className="tabular-nums">
             {doneCount} / {total}
           </span>
@@ -70,7 +72,7 @@ export function CourseSidebar({ onNavigate }: { onNavigate?: () => void }) {
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Поиск по курсу"
+            placeholder={t.searchCourse}
             className="w-full rounded-md border border-sidebar-border bg-sidebar-accent/40 py-2 pr-3 pl-8 text-sm placeholder:text-sidebar-foreground/40 focus:border-sidebar-ring focus:outline-none"
           />
         </label>
@@ -78,7 +80,7 @@ export function CourseSidebar({ onNavigate }: { onNavigate?: () => void }) {
 
       <nav className="flex-1 overflow-y-auto px-3 pb-6">
         {modules.length === 0 && (
-          <p className="px-2 py-3 text-sm text-sidebar-foreground/60">Ничего не найдено</p>
+          <p className="px-2 py-3 text-sm text-sidebar-foreground/60">{t.nothingFound}</p>
         )}
         {modules.map((m) => (
           <div key={m.title} className="mb-4">
@@ -93,7 +95,7 @@ export function CourseSidebar({ onNavigate }: { onNavigate?: () => void }) {
                   <button
                     type="button"
                     onClick={() => toggle(l.id)}
-                    aria-label={isDone ? "Снять отметку" : "Отметить пройденным"}
+                    aria-label={isDone ? t.markNotDone : t.markDone}
                     className={cn(
                       "mt-2 grid size-5 shrink-0 place-items-center rounded-full border transition-colors",
                       isDone
