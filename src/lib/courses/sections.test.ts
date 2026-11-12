@@ -70,7 +70,11 @@ describe("mapCoursesToSections", () => {
   ];
 
   it("maps courses onto sections and keeps both orders", () => {
-    const courses = [summary("b-1", "backend"), summary("a-1", "backend"), summary("aqa-1", "testing")];
+    const courses = [
+      summary("b-1", "backend"),
+      summary("a-1", "backend"),
+      summary("aqa-1", "testing"),
+    ];
     const mapped = mapCoursesToSections(sections, courses);
 
     expect(mapped.map((section) => section.id)).toEqual(["backend", "testing"]);
@@ -85,6 +89,9 @@ describe("mapCoursesToSections", () => {
 
   it("appends a course whose section was not declared", () => {
     const mapped = mapCoursesToSections(sections, [summary("fe-1", "frontend")]);
-    expect(mapped.at(-1)).toMatchObject({ id: "frontend", courses: [expect.objectContaining({ id: "fe-1" })] });
+    expect(mapped.at(-1)).toMatchObject({
+      id: "frontend",
+      courses: [expect.objectContaining({ id: "fe-1" })],
+    });
   });
 });

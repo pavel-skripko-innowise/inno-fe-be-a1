@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="96" viewBox="0 0 320 96" role="img" aria-labelledby="title">
+  <title id="title">Модуль 2 — Контроль доступа</title>
+  <rect width="320" height="96" rx="18" fill="#e9f7f0"/>
+  <circle cx="48" cy="48" r="30" fill="#23845b"/>
+  <text x="48" y="56" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" font-weight="700" fill="#fff">02</text>
+  <path d="M91 43h24v20H91zM95 43v-5a8 8 0 0 1 16 0v5m-8 8v5" fill="none" stroke="#23845b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="128" y="43" font-family="Arial,sans-serif" font-size="16" font-weight="700" fill="#173d2e">Контроль доступа</text>
+  <text x="128" y="65" font-family="Arial,sans-serif" font-size="13" fill="#38644f">и данные пользователя</text>
+</svg>

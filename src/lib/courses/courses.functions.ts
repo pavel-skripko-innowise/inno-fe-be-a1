@@ -14,9 +14,11 @@ export type Catalog = {
   courses: CourseSummary[];
 };
 
-export const listLocales = createServerFn({ method: "GET" }).handler(async (): Promise<string[]> => {
-  return (await load()).locales;
-});
+export const listLocales = createServerFn({ method: "GET" }).handler(
+  async (): Promise<string[]> => {
+    return (await load()).locales;
+  },
+);
 
 export const readLocale = createServerFn({ method: "GET" }).handler(async () => {
   try {
@@ -46,7 +48,10 @@ export const getCatalog = createServerFn({ method: "GET" })
       courses: courses
         .filter((course) => course.locale === resolved)
         .map((course) => {
-          const lessons = course.modules.flatMap((module) => module.lessons);
+          const lessons = [
+            ...(course.lessons ?? []),
+            ...course.modules.flatMap((module) => module.lessons),
+          ];
           return {
             id: course.id,
             sectionId: course.sectionId,
@@ -70,9 +75,14 @@ export const getCourse = createServerFn({ method: "GET" })
     const linkIndex: LinkIndex = {};
     for (const item of courses) {
       if (item.locale !== locale) continue;
-      for (const module of item.modules)
+      for (const lesson of item.lessons ?? [])
+        linkIndex[lesson.path] = { courseId: item.id, lessonId: lesson.id };
+      for (const module of item.modules) {
+        if (module.pagePath)
+          linkIndex[module.pagePath] = { courseId: item.id, moduleId: module.id };
         for (const lesson of module.lessons)
           linkIndex[lesson.path] = { courseId: item.id, lessonId: lesson.id };
+      }
     }
     return { course, linkIndex };
   });

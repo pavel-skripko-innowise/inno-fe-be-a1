@@ -11,18 +11,38 @@ import { useI18n } from "@/lib/locale";
 import { MermaidDiagram } from "./MermaidDiagram";
 
 const LANG_LABEL: Record<string, string> = {
-  js: "JavaScript", javascript: "JavaScript", ts: "TypeScript", typescript: "TypeScript",
-  py: "Python", python: "Python", cs: "C#", csharp: "C#", sh: "Shell", bash: "Shell",
-  shell: "Shell", sql: "SQL", json: "JSON", yaml: "YAML", yml: "YAML", xml: "XML",
-  html: "HTML", css: "CSS", go: "Go", java: "Java", http: "HTTP", text: "Text", plaintext: "Text",
+  js: "JavaScript",
+  javascript: "JavaScript",
+  ts: "TypeScript",
+  typescript: "TypeScript",
+  py: "Python",
+  python: "Python",
+  cs: "C#",
+  csharp: "C#",
+  sh: "Shell",
+  bash: "Shell",
+  shell: "Shell",
+  sql: "SQL",
+  json: "JSON",
+  yaml: "YAML",
+  yml: "YAML",
+  xml: "XML",
+  html: "HTML",
+  css: "CSS",
+  go: "Go",
+  java: "Java",
+  http: "HTTP",
+  text: "Text",
+  plaintext: "Text",
 };
 
 function CodeBlock({ children }: { children?: ReactNode }) {
   const ref = useRef<HTMLPreElement>(null);
   const [copied, setCopied] = useState(false);
   const { t } = useI18n();
-  const className =
-    isValidElement<{ className?: string }>(children) ? (children.props.className ?? "") : "";
+  const className = isValidElement<{ className?: string }>(children)
+    ? (children.props.className ?? "")
+    : "";
   const lang = className.match(/language-([\w+-]+)/)?.[1];
   if (lang === "mermaid" && isValidElement<{ children?: ReactNode }>(children))
     return <MermaidDiagram code={String(children.props.children ?? "").trim()} />;
@@ -49,6 +69,16 @@ function CodeBlock({ children }: { children?: ReactNode }) {
 
 type Props = { markdown: string; path: string; linkIndex: LinkIndex };
 
+function resolveImage(src: string) {
+  // Keep repository-relative image links readable in GitHub Markdown, while
+  // serving assets from Vite's public directory inside the course UI.
+  const marker = "public/";
+  const publicIndex = src.indexOf(marker);
+  if (publicIndex >= 0 && !/^[a-z][a-z0-9+.-]*:/i.test(src))
+    return `/${src.slice(publicIndex + marker.length)}`;
+  return src;
+}
+
 export function Markdown({ markdown, path, linkIndex }: Props) {
   const { t } = useI18n();
   const components: Components = {
@@ -71,6 +101,16 @@ export function Markdown({ markdown, path, linkIndex }: Props) {
               {children}
             </Link>
           );
+        case "module":
+          return (
+            <Link
+              to="/courses/$courseId/modules/$moduleId"
+              params={{ courseId: link.courseId, moduleId: link.moduleId }}
+              {...(link.hash ? { hash: link.hash } : {})}
+            >
+              {children}
+            </Link>
+          );
         case "anchor":
           return <a href={`#${link.hash}`}>{children}</a>;
         case "external":
@@ -88,6 +128,14 @@ export function Markdown({ markdown, path, linkIndex }: Props) {
           );
       }
     },
+    img: ({ src = "", alt = "" }) => (
+      <img
+        src={resolveImage(src)}
+        alt={alt}
+        className="my-5 max-h-48 max-w-full object-contain"
+        loading="lazy"
+      />
+    ),
   };
 
   return (
