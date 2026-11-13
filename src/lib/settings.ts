@@ -16,9 +16,14 @@ let cache: Settings | null = null;
 
 function normalize(value: Partial<Settings> | null): Settings {
   const theme = value?.theme === "dark" || value?.theme === "light" ? value.theme : DEFAULTS.theme;
-  const locale = typeof value?.locale === "string" && /^[a-z]{2}$/.test(value.locale) ? value.locale : DEFAULTS.locale;
+  const locale =
+    typeof value?.locale === "string" && /^[a-z]{2}$/.test(value.locale)
+      ? value.locale
+      : DEFAULTS.locale;
   const rememberPosition =
-    typeof value?.rememberPosition === "boolean" ? value.rememberPosition : DEFAULTS.rememberPosition;
+    typeof value?.rememberPosition === "boolean"
+      ? value.rememberPosition
+      : DEFAULTS.rememberPosition;
   return { theme, locale, rememberPosition };
 }
 

@@ -24,16 +24,28 @@ function Controls() {
   const { t } = useI18n();
   return (
     <div className="mermaid-controls">
-      <button type="button" onClick={() => zoomIn()} aria-label={t.zoomIn}><Plus /></button>
-      <button type="button" onClick={() => zoomOut()} aria-label={t.zoomOut}><Minus /></button>
-      <button type="button" onClick={() => resetTransform()} aria-label={t.resetZoom}><RotateCcw /></button>
+      <button type="button" onClick={() => zoomIn()} aria-label={t.zoomIn}>
+        <Plus />
+      </button>
+      <button type="button" onClick={() => zoomOut()} aria-label={t.zoomOut}>
+        <Minus />
+      </button>
+      <button type="button" onClick={() => resetTransform()} aria-label={t.resetZoom}>
+        <RotateCcw />
+      </button>
     </div>
   );
 }
 
 function ZoomableSvg({ svg, wheel }: { svg: string; wheel: boolean }) {
   return (
-    <TransformWrapper minScale={0.3} maxScale={8} centerOnInit wheel={{ disabled: !wheel, step: 0.1 }} doubleClick={{ mode: "zoomIn" }}>
+    <TransformWrapper
+      minScale={0.3}
+      maxScale={8}
+      centerOnInit
+      wheel={{ disabled: !wheel, step: 0.1 }}
+      doubleClick={{ mode: "zoomIn" }}
+    >
       <Controls />
       <TransformComponent wrapperClass="mermaid-viewport" contentClass="mermaid-content">
         <div dangerouslySetInnerHTML={{ __html: svg }} />

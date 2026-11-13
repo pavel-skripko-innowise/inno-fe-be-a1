@@ -34,7 +34,10 @@ export function resolveSectionDir(courseRelDir: string, sectionRelDirs: string[]
 }
 
 /** Course path with the owning section directory removed, so course ids stay stable when a section folder is added. */
-export function coursePathWithinSection(courseRelDir: string, sectionRelDir: string | null): string {
+export function coursePathWithinSection(
+  courseRelDir: string,
+  sectionRelDir: string | null,
+): string {
   if (sectionRelDir && courseRelDir.startsWith(`${sectionRelDir}/`)) {
     return courseRelDir.slice(sectionRelDir.length + 1);
   }

@@ -13,7 +13,13 @@ export function TableOfContents({ articleId, deps }: { articleId: string; deps: 
     const els = Array.from(
       document.getElementById(articleId)?.querySelectorAll<HTMLElement>("h2[id], h3[id]") ?? [],
     );
-    setHeadings(els.map((el) => ({ id: el.id, text: el.textContent ?? "", level: el.tagName === "H3" ? 3 : 2 })));
+    setHeadings(
+      els.map((el) => ({
+        id: el.id,
+        text: el.textContent ?? "",
+        level: el.tagName === "H3" ? 3 : 2,
+      })),
+    );
     const observer = new IntersectionObserver(
       (entries) => {
         const visible = entries.filter((e) => e.isIntersecting);

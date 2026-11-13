@@ -35,7 +35,9 @@ function Catalog() {
   const [emptyBefore, emptyAfter] = t.catalogEmpty.split("config.json");
   return (
     <main className="mx-auto max-w-5xl px-6 py-20">
-      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">{t.catalogEyebrow}</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+        {t.catalogEyebrow}
+      </p>
       <h1 className="mt-3 font-display text-5xl leading-tight">{t.catalogTitle}</h1>
       <p className="mt-3 max-w-xl text-lg text-muted-foreground">{t.catalogLead}</p>
 
@@ -68,7 +70,9 @@ function Catalog() {
                     >
                       <BookOpen className="size-6 text-primary" />
                       <h3 className="mt-4 font-display text-2xl leading-snug">{c.title}</h3>
-                      {c.description && <p className="mt-2 flex-1 text-muted-foreground">{c.description}</p>}
+                      {c.description && (
+                        <p className="mt-2 flex-1 text-muted-foreground">{c.description}</p>
+                      )}
                       <div className="mt-6 flex items-center justify-between text-sm text-muted-foreground">
                         <span>{t.courseStats(c.moduleCount, c.lessonCount)}</span>
                         <ArrowRight className="size-4 transition-transform group-hover:translate-x-1 group-hover:text-primary" />

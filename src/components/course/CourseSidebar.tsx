@@ -21,7 +21,7 @@ function snippet(text: string, q: string) {
 export function CourseSidebar({ onNavigate }: { onNavigate?: () => void }) {
   const { course, done, toggle } = useCourse();
   const { t } = useI18n();
-  const { lessonId } = useParams({ strict: false });
+  const { lessonId, moduleId } = useParams({ strict: false });
   const [query, setQuery] = useState("");
   const q = query.trim().toLowerCase();
   const total = flattenLessons(course).length;
@@ -32,6 +32,7 @@ export function CourseSidebar({ onNavigate }: { onNavigate?: () => void }) {
       course.modules
         .map((m) => ({
           ...m,
+          matchesModule: !q || `${m.title}\n${m.pageMarkdown}`.toLowerCase().includes(q),
           lessons: m.lessons
             .map((l) => ({
               ...l,
@@ -39,9 +40,15 @@ export function CourseSidebar({ onNavigate }: { onNavigate?: () => void }) {
             }))
             .filter((l) => !q || l.title.toLowerCase().includes(q) || l.hit),
         }))
-        .filter((m) => m.lessons.length),
+        .filter((m) => !q || m.matchesModule || m.lessons.length),
     [course, q],
   );
+  const standaloneLessons = course.lessons
+    .map((l) => ({
+      ...l,
+      hit: q && !l.title.toLowerCase().includes(q) ? snippet(l.markdown, q) : null,
+    }))
+    .filter((l) => !q || l.title.toLowerCase().includes(q) || l.hit);
 
   return (
     <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
@@ -79,14 +86,79 @@ export function CourseSidebar({ onNavigate }: { onNavigate?: () => void }) {
       </div>
 
       <nav className="flex-1 overflow-y-auto px-3 pb-6">
-        {modules.length === 0 && (
+        {modules.length === 0 && standaloneLessons.length === 0 && (
           <p className="px-2 py-3 text-sm text-sidebar-foreground/60">{t.nothingFound}</p>
         )}
-        {modules.map((m) => (
-          <div key={m.title} className="mb-4">
+        {standaloneLessons.length > 0 && (
+          <div className="mb-4">
             <p className="px-2 pt-2 pb-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-sidebar-foreground/50">
-              {m.title}
+              {t.introduction}
             </p>
+            {standaloneLessons.map((l) => (
+              <div key={l.id} className="group flex items-start gap-1">
+                <button
+                  type="button"
+                  onClick={() => toggle(l.id)}
+                  aria-label={done.has(l.id) ? t.markNotDone : t.markDone}
+                  className={cn(
+                    "mt-2 grid size-5 shrink-0 place-items-center rounded-full border transition-colors",
+                    done.has(l.id)
+                      ? "border-success bg-success text-success-foreground"
+                      : "border-sidebar-foreground/30 text-transparent hover:border-sidebar-foreground/60",
+                  )}
+                >
+                  <Check className="size-3" strokeWidth={3} />
+                </button>
+                <Link
+                  to="/courses/$courseId/$lessonId"
+                  params={{ courseId: course.id, lessonId: l.id }}
+                  onClick={onNavigate}
+                  className={cn(
+                    "flex-1 rounded-md px-2 py-1.5 text-sm leading-snug transition-colors",
+                    l.id === lessonId
+                      ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                      : "hover:bg-sidebar-accent/50",
+                  )}
+                >
+                  <span className="mr-2 font-mono text-xs text-sidebar-primary tabular-nums">
+                    {l.number}
+                  </span>
+                  {l.title}
+                  {l.hit && (
+                    <span className="mt-1 block text-xs text-sidebar-foreground/60">
+                      {l.hit.before}
+                      <mark className="rounded-sm bg-sidebar-primary/30 text-sidebar-accent-foreground">
+                        {l.hit.match}
+                      </mark>
+                      {l.hit.after}
+                    </span>
+                  )}
+                </Link>
+              </div>
+            ))}
+          </div>
+        )}
+        {modules.map((m) => (
+          <div key={m.id} className="mb-4">
+            {m.pagePath ? (
+              <Link
+                to="/courses/$courseId/modules/$moduleId"
+                params={{ courseId: course.id, moduleId: m.id }}
+                onClick={onNavigate}
+                className={cn(
+                  "block rounded-md px-2 pt-2 pb-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors",
+                  moduleId === m.id
+                    ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                    : "text-sidebar-foreground/50 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
+                )}
+              >
+                {m.title}
+              </Link>
+            ) : (
+              <p className="px-2 pt-2 pb-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-sidebar-foreground/50">
+                {m.title}
+              </p>
+            )}
             {m.lessons.map((l) => {
               const isDone = done.has(l.id);
               const isActive = l.id === lessonId;
