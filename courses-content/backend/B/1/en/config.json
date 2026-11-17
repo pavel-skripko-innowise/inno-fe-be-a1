@@ -1,12 +1,12 @@
 {
-  "title": "Back End · группа B1",
-  "description": "Микросервисная архитектура: декомпозиция, взаимодействие сервисов, согласованность данных, отказоустойчивость и развёртывание.",
+  "title": "Back End · Group B1",
+  "description": "Microservice architecture: decomposition, service communication, data consistency, fault tolerance, and deployment.",
   "lessons": [
     { "file": "0.0 Вводная часть.md" }
   ],
   "modules": [
     {
-      "title": "Теория",
+      "title": "Theory",
       "lessons": [
         { "file": "0.1 Декомпозиция на микросервисы.md" },
         { "file": "0.2 Синхронное взаимодействие.md" },
