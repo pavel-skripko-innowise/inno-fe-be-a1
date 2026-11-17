@@ -43,7 +43,9 @@ export function SettingsMenu() {
                 aria-pressed={locale === code}
                 onClick={() => updateSettings({ locale: code })}
                 className={`rounded-md py-1.5 text-sm transition ${
-                  locale === code ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                  locale === code
+                    ? "bg-card text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {localeLabel(code)}
@@ -61,7 +63,9 @@ export function SettingsMenu() {
                 type="button"
                 onClick={() => updateSettings({ theme: value })}
                 className={`flex items-center justify-center gap-1.5 rounded-md py-1.5 text-sm transition ${
-                  theme === value ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                  theme === value
+                    ? "bg-card text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <Icon className="size-4" /> {themeLabel[value]}
@@ -76,7 +80,9 @@ export function SettingsMenu() {
               <span className="flex items-center gap-1.5 text-sm font-medium">
                 <Bookmark className="size-4" /> {t.rememberPosition}
               </span>
-              <span className="mt-0.5 block text-xs text-muted-foreground">{t.rememberPositionHint}</span>
+              <span className="mt-0.5 block text-xs text-muted-foreground">
+                {t.rememberPositionHint}
+              </span>
             </span>
             <Switch
               checked={rememberPosition}

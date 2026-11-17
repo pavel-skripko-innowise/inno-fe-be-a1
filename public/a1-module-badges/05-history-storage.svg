@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="96" viewBox="0 0 320 96" role="img" aria-labelledby="title">
+  <title id="title">Модуль 5 — История и хранение результатов</title>
+  <rect width="320" height="96" rx="18" fill="#e5f7f7"/>
+  <circle cx="48" cy="48" r="30" fill="#167c80"/>
+  <text x="48" y="56" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" font-weight="700" fill="#fff">05</text>
+  <path d="M100 33v10l8 5m-7-17a17 17 0 1 0 16 22" fill="none" stroke="#167c80" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="128" y="43" font-family="Arial,sans-serif" font-size="16" font-weight="700" fill="#173f40">История и хранение</text>
+  <text x="128" y="65" font-family="Arial,sans-serif" font-size="13" fill="#3c6667">результатов</text>
+</svg>

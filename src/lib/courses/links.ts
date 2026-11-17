@@ -4,6 +4,7 @@ export type ResolvedLink =
   | { kind: "external"; href: string }
   | { kind: "anchor"; hash: string }
   | { kind: "lesson"; courseId: string; lessonId: string; hash?: string | undefined }
+  | { kind: "module"; courseId: string; moduleId: string; hash?: string | undefined }
   | { kind: "unknown"; href: string };
 
 function normalize(parts: string[]) {
@@ -34,6 +35,7 @@ export function resolveLink(href: string, fromPath: string, index: LinkIndex): R
   const base = rawPath.startsWith("/") ? [] : fromPath.split("/").slice(0, -1);
   const target = normalize([...base, ...decode(rawPath).split("/")]).normalize("NFC");
   const hit = index[target];
-  if (hit) return { kind: "lesson", ...hit, hash };
+  if (hit && "lessonId" in hit) return { kind: "lesson", ...hit, hash };
+  if (hit && "moduleId" in hit) return { kind: "module", ...hit, hash };
   return { kind: "unknown", href };
 }

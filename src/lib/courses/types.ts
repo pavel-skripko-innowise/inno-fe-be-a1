@@ -8,7 +8,14 @@ export type Lesson = {
   markdown: string;
 };
 
-export type CourseModule = { title: string; lessons: Lesson[] };
+export type CourseModule = {
+  id: string;
+  title: string;
+  pagePath: string;
+  pageMarkdown: string;
+  badgeColor: string;
+  lessons: Lesson[];
+};
 
 export type SectionMeta = {
   id: string;
@@ -23,6 +30,7 @@ export type Course = {
   sectionId: string;
   title: string;
   description: string;
+  lessons: Lesson[];
   modules: CourseModule[];
 };
 
@@ -39,6 +47,12 @@ export type CourseSummary = {
 export type Section = SectionMeta & { courses: CourseSummary[] };
 
 /** root-relative .md path -> where it lives in the app */
-export type LinkIndex = Record<string, { courseId: string; lessonId: string }>;
+export type LinkIndex = Record<
+  string,
+  { courseId: string; lessonId: string } | { courseId: string; moduleId: string }
+>;
 
-export const flattenLessons = (course: Course) => course.modules.flatMap((m) => m.lessons);
+export const flattenLessons = (course: Course) => [
+  ...course.lessons,
+  ...course.modules.flatMap((m) => m.lessons),
+];

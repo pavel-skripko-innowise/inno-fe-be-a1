@@ -14,4 +14,12 @@ describe("App routing", () => {
 
     expect(matches.at(-1)?.routeId).not.toBe(rootRouteId);
   });
+
+  it("matches module landing pages", () => {
+    const router = createRouter({ routeTree, context: { queryClient: new QueryClient() } });
+
+    const matches = router.matchRoutes("/courses/backend-a1/modules/identity");
+
+    expect(matches.at(-1)?.routeId).toBe("/courses/$courseId/modules/$moduleId");
+  });
 });

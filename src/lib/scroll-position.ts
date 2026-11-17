@@ -75,7 +75,9 @@ export function useScrollMemory(key: string, rootId: string, enabled: boolean) {
       const all = load();
       if (last === null) delete all[key];
       else all[key] = last;
-      const entries = Object.entries(all).sort((a, b) => b[1].t - a[1].t).slice(0, MAX_ENTRIES);
+      const entries = Object.entries(all)
+        .sort((a, b) => b[1].t - a[1].t)
+        .slice(0, MAX_ENTRIES);
       localStorage.setItem(KEY, JSON.stringify(Object.fromEntries(entries)));
       last = undefined;
     };
@@ -99,7 +101,9 @@ export function useScrollMemory(key: string, rootId: string, enabled: boolean) {
       ro.disconnect();
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("pagehide", flush);
-      ["wheel", "touchstart", "keydown", "mousedown"].forEach((e) => window.removeEventListener(e, stop));
+      ["wheel", "touchstart", "keydown", "mousedown"].forEach((e) =>
+        window.removeEventListener(e, stop),
+      );
     };
   }, [key, rootId, enabled]);
 }

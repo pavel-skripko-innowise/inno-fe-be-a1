@@ -13,7 +13,9 @@ import { useI18n } from "@/lib/locale";
 export const Route = createFileRoute("/courses/$courseId")({
   loader: async ({ context, params }) => {
     const locale = await resolveLocale(context.queryClient);
-    const { course } = await context.queryClient.ensureQueryData(courseQuery(locale, params.courseId));
+    const { course } = await context.queryClient.ensureQueryData(
+      courseQuery(locale, params.courseId),
+    );
     return { title: course.title, locale };
   },
   head: ({ loaderData }) => {

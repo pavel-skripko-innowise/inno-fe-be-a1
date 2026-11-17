@@ -24,6 +24,17 @@ export type Messages = {
   lessonMissing: string;
   lessonDescription: (course: string) => string;
   courseEmpty: string;
+  introduction: string;
+  courseProgram: string;
+  courseNoModules: string;
+  moduleListItem: (index: number, lessons: number) => string;
+  moduleChoose: string;
+  moduleCounter: (current: number, total: number) => string;
+  moduleOpenFirst: string;
+  moduleNoPage: string;
+  previousModule: string;
+  nextModule: string;
+  moduleMissing: string;
   openMenu: string;
   courseNav: string;
   coursesBrand: string;
@@ -82,6 +93,17 @@ const ru: Messages = {
   lessonMissing: "Урок не найден",
   lessonDescription: (course) => `Урок курса «${course}»`,
   courseEmpty: "В курсе пока нет уроков.",
+  introduction: "Введение",
+  courseProgram: "Программа курса",
+  courseNoModules: "В этом курсе пока нет модулей.",
+  moduleListItem: (index, lessons) => `Модуль ${index} · ${lessons} материалов`,
+  moduleChoose: "Выберите модуль, чтобы открыть его материалы.",
+  moduleCounter: (current, total) => `Модуль ${current} из ${total}`,
+  moduleOpenFirst: "Перейти к первому материалу",
+  moduleNoPage: "Материалы этого модуля собраны в список. Выберите тему, чтобы открыть её.",
+  previousModule: "Предыдущий модуль",
+  nextModule: "Следующий модуль",
+  moduleMissing: "Модуль не найден.",
   openMenu: "Открыть меню",
   courseNav: "Навигация по курсу",
   coursesBrand: "Курсы",
@@ -121,7 +143,8 @@ const en: Messages = {
   catalogTitle: "Sections",
   catalogLead: "Choose a section and a course to continue where you left off.",
   catalogDescription: "Training sections for the team.",
-  catalogEmpty: "No sections found. Add a section folder with config.json to the content directory.",
+  catalogEmpty:
+    "No sections found. Add a section folder with config.json to the content directory.",
   sectionEmpty: "This section has no courses yet.",
   courseStats: (modules, lessons) => `${modules} mod. · ${lessons} lessons`,
   allSections: "All sections",
@@ -140,6 +163,17 @@ const en: Messages = {
   lessonMissing: "Lesson not found",
   lessonDescription: (course) => `Lesson from “${course}”`,
   courseEmpty: "This course has no lessons yet.",
+  introduction: "Introduction",
+  courseProgram: "Course program",
+  courseNoModules: "This course has no modules yet.",
+  moduleListItem: (index, lessons) => `Module ${index} · ${lessons} materials`,
+  moduleChoose: "Choose a module to open its materials.",
+  moduleCounter: (current, total) => `Module ${current} of ${total}`,
+  moduleOpenFirst: "Open the first material",
+  moduleNoPage: "The materials in this module are listed below. Choose a topic to open it.",
+  previousModule: "Previous module",
+  nextModule: "Next module",
+  moduleMissing: "Module not found.",
   openMenu: "Open menu",
   courseNav: "Course navigation",
   coursesBrand: "Courses",

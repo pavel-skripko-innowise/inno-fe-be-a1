@@ -12,16 +12,31 @@
 import fs from "node:fs";
 import path from "node:path";
 import { loadEnv, type Plugin } from "vite";
-import { coursePathWithinSection, resolveSectionDir, splitContentLocale } from "./src/lib/courses/sections";
+import {
+  coursePathWithinSection,
+  resolveSectionDir,
+  splitContentLocale,
+} from "./src/lib/courses/sections";
 
 const VIRTUAL_ID = "virtual:courses-content";
 const RESOLVED_ID = "\0" + VIRTUAL_ID;
 
 type RawLesson = { id?: string; title?: string; file: string };
-type RawModule = { title: string; lessons: RawLesson[] };
-type RawCourseConfig = { id?: string; title?: string; description?: string; modules: RawModule[] };
+type RawModule = { id?: string; title: string; page?: string; lessons: RawLesson[] };
+type RawCourseConfig = {
+  id?: string;
+  title?: string;
+  description?: string;
+  lessons?: RawLesson[];
+  modules: RawModule[];
+};
 type RawSectionConfig = { id?: string; title?: string; description?: string; order?: number };
-type LoadedConfig = { configPath: string; dir: string; relDir: string; data: Record<string, unknown> };
+type LoadedConfig = {
+  configPath: string;
+  dir: string;
+  relDir: string;
+  data: Record<string, unknown>;
+};
 
 const toPosix = (p: string) => p.split(path.sep).join("/");
 
@@ -62,12 +77,19 @@ function readConfigs(root: string): LoadedConfig[] {
       continue;
     }
     const dir = path.dirname(configPath);
-    out.push({ configPath, dir, relDir: toPosix(path.relative(root, dir)), data: data as Record<string, unknown> });
+    out.push({
+      configPath,
+      dir,
+      relDir: toPosix(path.relative(root, dir)),
+      data: data as Record<string, unknown>,
+    });
   }
   return out;
 }
 
-function isCourseConfig(data: Record<string, unknown>): data is RawCourseConfig & Record<string, unknown> {
+function isCourseConfig(
+  data: Record<string, unknown>,
+): data is RawCourseConfig & Record<string, unknown> {
   return Array.isArray(data.modules);
 }
 
@@ -78,7 +100,7 @@ function uniqueId(base: string, used: Set<string>) {
   return id;
 }
 
-function loadLocale(root: string, configs: LoadedConfig[], locale: string) {
+function loadLocale(root: string, projectRoot: string, configs: LoadedConfig[], locale: string) {
   const sectionConfigs = configs.filter((item) => !isCourseConfig(item.data));
   const courseConfigs = configs.filter((item) => isCourseConfig(item.data));
   const usedSectionIds = new Set<string>();
@@ -87,7 +109,10 @@ function loadLocale(root: string, configs: LoadedConfig[], locale: string) {
     const data = item.data as RawSectionConfig;
     const folder = item.relDir.split("/").pop() || "section";
     return {
-      id: uniqueId(typeof data.id === "string" && data.id ? slugify(data.id) : slugify(folder), usedSectionIds),
+      id: uniqueId(
+        typeof data.id === "string" && data.id ? slugify(data.id) : slugify(folder),
+        usedSectionIds,
+      ),
       title: data.title?.trim() || folder,
       description: data.description ?? "",
       order: typeof data.order === "number" && Number.isFinite(data.order) ? data.order : 0,
@@ -118,40 +143,76 @@ function loadLocale(root: string, configs: LoadedConfig[], locale: string) {
           relDir: "",
         });
       }
-      console.warn(`[courses] ${item.relDir} is outside a section config.json; grouped as "${sectionId}"`);
+      console.warn(
+        `[courses] ${item.relDir} is outside a section config.json; grouped as "${sectionId}"`,
+      );
     }
 
     const within = coursePathWithinSection(item.relDir, sectionRel);
     const slug = within ? within.split("/").map(slugify).join("-") : "course";
     const id = uniqueId(config.id ? slugify(config.id) : slug, usedCourseIds);
     const usedLessonIds = new Set<string>();
-    const modules = (config.modules ?? []).map((mod, mi) => ({
-      title: mod.title,
-      lessons: (mod.lessons ?? []).map((lesson, li) => {
-        const filePath = path.resolve(item.dir, lesson.file);
-        const lessonId = uniqueId(
-          lesson.id ?? slugify(path.basename(lesson.file, path.extname(lesson.file))),
-          usedLessonIds,
-        );
-        let markdown = "";
+    const loadLesson = (lesson: RawLesson, fallbackNumber: string) => {
+      const filePath = path.resolve(item.dir, lesson.file);
+      const lessonId = uniqueId(
+        lesson.id ?? slugify(path.basename(lesson.file, path.extname(lesson.file))),
+        usedLessonIds,
+      );
+      let markdown = "";
+      try {
+        markdown = fs.readFileSync(filePath, "utf8");
+      } catch {
+        console.warn(`[courses] Missing file ${filePath} (course ${item.relDir})`);
+        markdown = `> Файл \`${lesson.file}\` не найден.`;
+      }
+      const heading = markdown.match(/^#\s+(.+)$/m)?.[1]?.trim();
+      return {
+        id: lessonId,
+        number:
+          path.basename(lesson.file).match(/^(\d+(?:\.\d+)*)(?=[\s._-])/)?.[1] ?? fallbackNumber,
+        title: lesson.title ?? heading ?? lesson.file,
+        path: toPosix(path.relative(root, filePath)).normalize("NFC"),
+        markdown,
+      };
+    };
+    const lessons = (config.lessons ?? []).map((lesson, li) => loadLesson(lesson, `0.${li}`));
+    const modules = (config.modules ?? []).map((mod, mi) => {
+      const pagePath = mod.page ? path.resolve(item.dir, mod.page) : "";
+      let pageMarkdown = "";
+      if (pagePath) {
         try {
-          markdown = fs.readFileSync(filePath, "utf8");
+          pageMarkdown = fs.readFileSync(pagePath, "utf8");
         } catch {
-          console.warn(`[courses] Missing file ${filePath} (course ${item.relDir})`);
-          markdown = `> Файл \`${lesson.file}\` не найден.`;
+          console.warn(`[courses] Missing module page ${pagePath} (course ${item.relDir})`);
+          pageMarkdown = `> Файл страницы модуля \`${mod.page}\` не найден.`;
         }
-        const heading = markdown.match(/^#\s+(.+)$/m)?.[1]?.trim();
-        return {
-          id: lessonId,
-          // Prefer the number from the file name ("0.1 Базы данных.md" -> "0.1"), else position.
-          number:
-            path.basename(lesson.file).match(/^(\d+(?:\.\d+)*)(?=[\s._-])/)?.[1] ?? `${mi + 1}.${li + 1}`,
-          title: lesson.title ?? heading ?? lesson.file,
-          path: toPosix(path.relative(root, filePath)).normalize("NFC"),
-          markdown,
-        };
-      }),
-    }));
+      }
+      const badgeSource = pageMarkdown.match(/!\[[^\]]*\]\(([^)]+)\)/)?.[1] ?? "";
+      const publicMarker = "public/";
+      const publicIndex = badgeSource.indexOf(publicMarker);
+      let badgeColor = "";
+      if (publicIndex >= 0 && !/^[a-z][a-z0-9+.-]*:/i.test(badgeSource)) {
+        const badgeFile = path.resolve(
+          projectRoot,
+          "public",
+          badgeSource.slice(publicIndex + publicMarker.length),
+        );
+        try {
+          const svg = fs.readFileSync(badgeFile, "utf8");
+          badgeColor = svg.match(/<circle\b[^>]*\bfill=["'](#[\da-f]{3,8})["']/i)?.[1] ?? "";
+        } catch {
+          console.warn(`[courses] Missing module badge ${badgeFile} (course ${item.relDir})`);
+        }
+      }
+      return {
+        id: mod.id ?? slugify(mod.title),
+        title: mod.title,
+        pagePath: pagePath ? toPosix(path.relative(root, pagePath)).normalize("NFC") : "",
+        pageMarkdown,
+        badgeColor,
+        lessons: (mod.lessons ?? []).map((lesson, li) => loadLesson(lesson, `${mi + 1}.${li + 1}`)),
+      };
+    });
 
     return {
       id,
@@ -159,6 +220,7 @@ function loadLocale(root: string, configs: LoadedConfig[], locale: string) {
       sectionId,
       title: config.title ?? item.relDir,
       description: config.description ?? "",
+      lessons,
       modules,
     };
   });
@@ -169,7 +231,7 @@ function loadLocale(root: string, configs: LoadedConfig[], locale: string) {
   };
 }
 
-function loadContent(root: string) {
+function loadContent(root: string, projectRoot: string) {
   const byLocale = new Map<string, LoadedConfig[]>();
   const sharedSections: LoadedConfig[] = [];
   for (const item of readConfigs(root)) {
@@ -179,7 +241,9 @@ function loadContent(root: string) {
         sharedSections.push(item);
         continue;
       }
-      console.warn(`[courses] ${item.relDir || item.configPath} is outside a course language folder (backend/A/1/ru); skipped`);
+      console.warn(
+        `[courses] ${item.relDir || item.configPath} is outside a course language folder (backend/A/1/ru); skipped`,
+      );
       continue;
     }
     const list = byLocale.get(split.locale) ?? [];
@@ -188,11 +252,13 @@ function loadContent(root: string) {
   }
   for (const list of byLocale.values()) list.push(...sharedSections);
 
-  const locales = [...byLocale.keys()].sort((a, b) => (a === "ru" ? -1 : b === "ru" ? 1 : a.localeCompare(b)));
+  const locales = [...byLocale.keys()].sort((a, b) =>
+    a === "ru" ? -1 : b === "ru" ? 1 : a.localeCompare(b),
+  );
   const sections = [];
   const courses = [];
   for (const locale of locales) {
-    const loaded = loadLocale(root, byLocale.get(locale) ?? [], locale);
+    const loaded = loadLocale(root, projectRoot, byLocale.get(locale) ?? [], locale);
     sections.push(...loaded.sections);
     courses.push(...loaded.courses);
   }
@@ -201,11 +267,16 @@ function loadContent(root: string) {
 
 export function coursesContent(): Plugin {
   let root = "";
+  let projectRoot = "";
   return {
     name: "courses-content",
     configResolved(config) {
+      projectRoot = config.root;
       const env = loadEnv(config.mode, config.root, "");
-      root = path.resolve(config.root, env["COURSES_DIR"] || process.env["COURSES_DIR"] || "courses-content");
+      root = path.resolve(
+        config.root,
+        env["COURSES_DIR"] || process.env["COURSES_DIR"] || "courses-content",
+      );
     },
     resolveId(id) {
       return id === VIRTUAL_ID ? RESOLVED_ID : null;
@@ -213,7 +284,7 @@ export function coursesContent(): Plugin {
     load(id) {
       if (id !== RESOLVED_ID) return null;
       this.addWatchFile(root);
-      const content = loadContent(root);
+      const content = loadContent(root, projectRoot);
       return `export const locales = ${JSON.stringify(content.locales)};\nexport const sections = ${JSON.stringify(content.sections)};\nexport const courses = ${JSON.stringify(content.courses)};`;
     },
     configureServer(server) {

@@ -15,7 +15,9 @@ import { useScrollMemory } from "@/lib/scroll-position";
 export const Route = createFileRoute("/courses/$courseId/$lessonId")({
   loader: async ({ context, params }) => {
     const locale = await resolveLocale(context.queryClient);
-    const { course } = await context.queryClient.ensureQueryData(courseQuery(locale, params.courseId));
+    const { course } = await context.queryClient.ensureQueryData(
+      courseQuery(locale, params.courseId),
+    );
     const lesson = flattenLessons(course).find((l) => l.id === params.lessonId);
     if (!lesson) throw notFound();
     return { title: lesson.title, course: course.title, locale };
@@ -113,7 +115,11 @@ function LessonPage() {
                 {index + 1} / {lessons.length}
               </span>
             </p>
-            <Button variant={isDone ? "success" : "outline"} size="sm" onClick={() => toggle(lessonId)}>
+            <Button
+              variant={isDone ? "success" : "outline"}
+              size="sm"
+              onClick={() => toggle(lessonId)}
+            >
               <Check /> {isDone ? t.done : t.markDone}
             </Button>
           </div>
@@ -123,11 +129,7 @@ function LessonPage() {
           </article>
 
           <nav className="mt-16 grid gap-4 border-t border-border pt-8 sm:grid-cols-2">
-            {prev ? (
-              <PagerLink courseId={course.id} lesson={prev} dir="prev" />
-            ) : (
-              <span />
-            )}
+            {prev ? <PagerLink courseId={course.id} lesson={prev} dir="prev" /> : <span />}
             {next && <PagerLink courseId={course.id} lesson={next} dir="next" />}
           </nav>
         </main>
@@ -157,7 +159,10 @@ function PagerLink({
       params={{ courseId, lessonId: lesson.id }}
       className={`group rounded-lg border border-border bg-card p-4 transition-colors hover:border-primary ${dir === "next" ? "text-right sm:col-start-2" : ""}`}
     >
-      <span className="flex items-center gap-1 text-xs text-muted-foreground data-[dir=next]:justify-end" data-dir={dir}>
+      <span
+        className="flex items-center gap-1 text-xs text-muted-foreground data-[dir=next]:justify-end"
+        data-dir={dir}
+      >
         {dir === "prev" && <ChevronLeft className="size-3.5" />}
         {dir === "prev" ? t.back : t.next}
         {dir === "next" && <ChevronRight className="size-3.5" />}

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="96" viewBox="0 0 320 96" role="img" aria-labelledby="title">
+  <title id="title">Модуль 1 — Идентификация пользователя</title>
+  <rect width="320" height="96" rx="18" fill="#e8f2ff"/>
+  <circle cx="48" cy="48" r="30" fill="#1769aa"/>
+  <text x="48" y="56" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" font-weight="700" fill="#fff">01</text>
+  <path d="M92 34h16v16H92zM96 34v-5a4 4 0 0 1 8 0v5" fill="none" stroke="#1769aa" stroke-width="3" stroke-linejoin="round"/>
+  <text x="122" y="43" font-family="Arial,sans-serif" font-size="16" font-weight="700" fill="#17324d">Идентификация</text>
+  <text x="122" y="65" font-family="Arial,sans-serif" font-size="13" fill="#36536f">пользователя</text>
+</svg>
