@@ -1,7 +1,16 @@
 import type { CSSProperties } from "react";
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { Menu } from "lucide-react";
+import { BookX, Menu } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 import { Sidebar, SidebarProvider, SidebarRail, useSidebar } from "@/components/ui/sidebar";
 import { CourseSidebar } from "@/components/course/CourseSidebar";
 import { CourseContext } from "@/components/course/CourseContext";
@@ -32,14 +41,22 @@ export const Route = createFileRoute("/courses/$courseId")({
 function CourseMissing() {
   const { t } = useI18n();
   return (
-    <div className="grid min-h-screen place-items-center p-6 text-center">
-      <div>
-        <h1 className="font-display text-3xl">{t.courseMissing}</h1>
-        <Link to="/" className="mt-4 inline-block text-primary underline">
-          {t.backToSections}
-        </Link>
-      </div>
-    </div>
+    <Empty className="min-h-screen">
+      <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <BookX />
+        </EmptyMedia>
+        <EmptyTitle className="font-display text-2xl">
+          <h1>{t.courseMissing}</h1>
+        </EmptyTitle>
+        <EmptyDescription>{t.pageMissingBody}</EmptyDescription>
+      </EmptyHeader>
+      <EmptyContent>
+        <Button asChild>
+          <Link to="/">{t.backToSections}</Link>
+        </Button>
+      </EmptyContent>
+    </Empty>
   );
 }
 
@@ -73,13 +90,14 @@ function MobileMenuButton() {
   const { t } = useI18n();
   const { setOpenMobile } = useSidebar();
   return (
-    <button
-      type="button"
+    <Button
+      variant="outline"
+      size="icon"
       onClick={() => setOpenMobile(true)}
-      className="fixed top-3 left-3 z-30 grid size-10 place-items-center rounded-md border border-border bg-card shadow-sm lg:hidden"
+      className="fixed top-3 left-3 z-30 size-10 bg-card lg:hidden [&_svg]:size-5"
       aria-label={t.openMenu}
     >
-      <Menu className="size-5" />
-    </button>
+      <Menu />
+    </Button>
   );
 }

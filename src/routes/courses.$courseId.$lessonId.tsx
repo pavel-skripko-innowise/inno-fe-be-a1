@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
-import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
-import { Check, ChevronLeft, ChevronRight } from "lucide-react";
+import { createFileRoute, Link, notFound, useNavigate, useParams } from "@tanstack/react-router";
+import { Check, ChevronLeft, ChevronRight, FileQuestionMark } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Empty, EmptyContent, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
+import { Item, ItemActions, ItemContent, ItemMedia, ItemTitle } from "@/components/ui/item";
+import { Progress } from "@/components/ui/progress";
 import { Markdown } from "@/components/markdown/Markdown";
 import { TableOfContents } from "@/components/course/TableOfContents";
 import { useCourse } from "@/components/course/CourseContext";
@@ -11,6 +15,7 @@ import { messagesFor } from "@/lib/i18n";
 import { useI18n } from "@/lib/locale";
 import { useSettings } from "@/lib/settings";
 import { useScrollMemory } from "@/lib/scroll-position";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/courses/$courseId/$lessonId")({
   loader: async ({ context, params }) => {
@@ -54,15 +59,38 @@ function ReadingBar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
   return (
-    <div className="fixed top-0 right-0 left-0 z-40 h-0.5">
-      <div className="h-full bg-primary" style={{ width: `${p * 100}%` }} />
-    </div>
+    <Progress
+      value={p * 100}
+      aria-hidden
+      className="fixed top-0 right-0 left-0 z-40 h-0.5 rounded-none bg-transparent"
+    />
   );
 }
 
 function LessonMissing() {
   const { t } = useI18n();
-  return <p className="p-10 text-muted-foreground">{t.lessonMissing}</p>;
+  const { courseId } = useParams({ strict: false });
+  return (
+    <Empty className="min-h-[70vh]">
+      <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <FileQuestionMark />
+        </EmptyMedia>
+        <EmptyTitle className="font-display text-2xl">
+          <h1>{t.lessonMissing}</h1>
+        </EmptyTitle>
+      </EmptyHeader>
+      {courseId && (
+        <EmptyContent>
+          <Button asChild>
+            <Link to="/courses/$courseId" params={{ courseId }} activeOptions={{ exact: true }}>
+              {t.courseProgram}
+            </Link>
+          </Button>
+        </EmptyContent>
+      )}
+    </Empty>
+  );
 }
 
 function LessonPage() {
@@ -109,11 +137,11 @@ function LessonPage() {
       <div className="mx-auto grid max-w-6xl gap-12 px-5 pt-16 pb-24 sm:px-10 lg:pt-14 xl:grid-cols-[minmax(0,1fr)_220px]">
         <main className="min-w-0">
           <div className="mb-8 flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
-            <p className="text-sm text-muted-foreground">
-              {module?.title} <span className="mx-1.5">·</span>
-              <span className="font-mono tabular-nums">
+            <p className="flex items-center gap-2.5 text-sm text-muted-foreground">
+              {module?.title}
+              <Badge variant="outline" className="font-mono font-medium tabular-nums">
                 {index + 1} / {lessons.length}
-              </span>
+              </Badge>
             </p>
             <Button
               variant={isDone ? "success" : "outline"}
@@ -153,24 +181,35 @@ function PagerLink({
   dir: "prev" | "next";
 }) {
   const { t } = useI18n();
+  const next = dir === "next";
   return (
-    <Link
-      to="/courses/$courseId/$lessonId"
-      params={{ courseId, lessonId: lesson.id }}
-      className={`group rounded-lg border border-border bg-card p-4 transition-colors hover:border-primary ${dir === "next" ? "text-right sm:col-start-2" : ""}`}
+    <Item
+      asChild
+      variant="outline"
+      className={cn(
+        "flex-nowrap bg-card [a]:hover:border-primary [a]:hover:bg-card",
+        next && "text-right sm:col-start-2",
+      )}
     >
-      <span
-        className="flex items-center gap-1 text-xs text-muted-foreground data-[dir=next]:justify-end"
-        data-dir={dir}
-      >
-        {dir === "prev" && <ChevronLeft className="size-3.5" />}
-        {dir === "prev" ? t.back : t.next}
-        {dir === "next" && <ChevronRight className="size-3.5" />}
-      </span>
-      <span className="mt-1 block font-medium group-hover:text-primary">
-        <span className="mr-2 font-mono text-sm text-primary">{lesson.number}</span>
-        {lesson.title}
-      </span>
-    </Link>
+      <Link to="/courses/$courseId/$lessonId" params={{ courseId, lessonId: lesson.id }}>
+        {!next && (
+          <ItemMedia>
+            <ChevronLeft className="size-4 text-muted-foreground group-hover/item:text-primary" />
+          </ItemMedia>
+        )}
+        <ItemContent className={cn("min-w-0", next && "items-end")}>
+          <span className="text-xs text-muted-foreground">{next ? t.next : t.back}</span>
+          <ItemTitle className="block w-auto text-base group-hover/item:text-primary">
+            <span className="mr-2 font-mono text-sm text-primary">{lesson.number}</span>
+            {lesson.title}
+          </ItemTitle>
+        </ItemContent>
+        {next && (
+          <ItemActions>
+            <ChevronRight className="size-4 text-muted-foreground group-hover/item:text-primary" />
+          </ItemActions>
+        )}
+      </Link>
+    </Item>
   );
 }

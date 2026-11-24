@@ -1,6 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { ArrowRight, BookOpen } from "lucide-react";
+import { ArrowRight, BookOpen, FolderOpen } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 import { catalogQuery, resolveLocale } from "@/lib/courses/courses.functions";
 import { mapCoursesToSections } from "@/lib/courses/sections";
 import { messagesFor } from "@/lib/i18n";
@@ -42,11 +51,19 @@ function Catalog() {
       <p className="mt-3 max-w-xl text-lg text-muted-foreground">{t.catalogLead}</p>
 
       {sections.length === 0 ? (
-        <p className="mt-12 rounded-lg border border-dashed border-border p-8 text-muted-foreground">
-          {emptyBefore}
-          <code className="font-mono">config.json</code>
-          {emptyAfter}
-        </p>
+        <Empty className="mt-12 border">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <FolderOpen />
+            </EmptyMedia>
+            <EmptyTitle>{t.catalogTitle}</EmptyTitle>
+            <EmptyDescription>
+              {emptyBefore}
+              <code className="font-mono">config.json</code>
+              {emptyAfter}
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       ) : (
         <div className="mt-14 space-y-16">
           {sections.map((section) => (
@@ -56,9 +73,9 @@ function Catalog() {
                 <p className="mt-2 max-w-2xl text-muted-foreground">{section.description}</p>
               )}
               {section.courses.length === 0 ? (
-                <p className="mt-6 rounded-lg border border-dashed border-border p-6 text-muted-foreground">
-                  {t.sectionEmpty}
-                </p>
+                <Empty className="mt-6 border p-6 md:p-6">
+                  <EmptyDescription>{t.sectionEmpty}</EmptyDescription>
+                </Empty>
               ) : (
                 <div className="mt-6 grid gap-5 sm:grid-cols-2">
                   {section.courses.map((c) => (
@@ -66,17 +83,25 @@ function Catalog() {
                       key={c.id}
                       to="/courses/$courseId"
                       params={{ courseId: c.id }}
-                      className="group flex flex-col rounded-xl border border-border bg-card p-6 shadow-card transition-all hover:-translate-y-0.5 hover:border-primary"
+                      className="group rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
-                      <BookOpen className="size-6 text-primary" />
-                      <h3 className="mt-4 font-display text-2xl leading-snug">{c.title}</h3>
-                      {c.description && (
-                        <p className="mt-2 flex-1 text-muted-foreground">{c.description}</p>
-                      )}
-                      <div className="mt-6 flex items-center justify-between text-sm text-muted-foreground">
-                        <span>{t.courseStats(c.moduleCount, c.lessonCount)}</span>
-                        <ArrowRight className="size-4 transition-transform group-hover:translate-x-1 group-hover:text-primary" />
-                      </div>
+                      <Card className="flex h-full flex-col shadow-card transition-all group-hover:-translate-y-0.5 group-hover:border-primary">
+                        <CardHeader className="flex-1">
+                          <BookOpen className="size-6 text-primary" />
+                          <CardTitle className="pt-2.5 font-display text-2xl leading-snug font-medium tracking-normal">
+                            <h3>{c.title}</h3>
+                          </CardTitle>
+                          {c.description && (
+                            <CardDescription className="text-base">{c.description}</CardDescription>
+                          )}
+                        </CardHeader>
+                        <CardFooter className="justify-between">
+                          <Badge variant="secondary" className="font-medium">
+                            {t.courseStats(c.moduleCount, c.lessonCount)}
+                          </Badge>
+                          <ArrowRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-primary" />
+                        </CardFooter>
+                      </Card>
                     </Link>
                   ))}
                 </div>

@@ -292,31 +292,6 @@
     background: var(--inline-code-bg);
     border-radius: 0.3rem;
   }
-  .lesson-prose .table-wrap {
-    margin: 1.5rem 0;
-    overflow-x: auto;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-  }
-  .lesson-prose table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.95rem;
-  }
-  .lesson-prose th {
-    background: var(--secondary);
-    text-align: left;
-    font-weight: 600;
-  }
-  .lesson-prose th,
-  .lesson-prose td {
-    padding: 0.6rem 0.9rem;
-    border-bottom: 1px solid var(--border);
-  }
-  .lesson-prose tr:last-child td {
-    border-bottom: 0;
-  }
-
   .code-block {
     margin: 1.5rem 0;
     border-radius: var(--radius);
@@ -334,18 +309,7 @@
     font-size: 0.75rem;
     font-family: var(--font-sans);
   }
-  .code-block__bar button {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    padding: 0.2rem 0.5rem;
-    border-radius: 0.3rem;
-  }
-  .code-block__bar button:hover {
-    color: var(--code-fg);
-    background: var(--code-bg);
-  }
-  .code-block pre {
+  .code-block > pre {
     margin: 0;
     padding: 1rem 1.1rem;
     overflow-x: auto;
@@ -399,44 +363,6 @@
     place-items: center;
     color: var(--muted-foreground);
     font-size: 0.9rem;
-  }
-  .mermaid-controls {
-    position: absolute;
-    right: 0.75rem;
-    bottom: 0.75rem;
-    z-index: 5;
-    display: flex;
-    gap: 0.25rem;
-    padding: 0.25rem;
-    border-radius: var(--radius);
-    background: var(--card);
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow-card);
-  }
-  .mermaid-controls button {
-    display: grid;
-    place-items: center;
-    width: 2rem;
-    height: 2rem;
-    border-radius: 0.3rem;
-    color: var(--muted-foreground);
-  }
-  .mermaid-controls button:hover {
-    background: var(--secondary);
-    color: var(--foreground);
-  }
-  .mermaid-controls svg {
-    width: 1rem;
-    height: 1rem;
-  }
-  .mermaid-error {
-    padding: 1rem;
-    color: var(--destructive);
-    font-size: 0.9rem;
-  }
-  .mermaid-error pre {
-    color: var(--muted-foreground);
-    padding: 0.5rem 0 0;
   }
   .mermaid-dialog {
     max-width: 95vw !important;

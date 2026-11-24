@@ -9,9 +9,19 @@ import {
   type ErrorComponentProps,
 } from "@tanstack/react-router";
 import { useEffect, useRef, type ReactNode } from "react";
+import { TriangleAlert } from "lucide-react";
 
 import appCss from "../styles.css?url";
 import { SettingsMenu } from "@/components/SettingsMenu";
+import { Button } from "@/components/ui/button";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 import { messagesFor } from "@/lib/i18n";
 import { LocaleProvider } from "@/lib/locale";
 import { localesQuery, resolveLocale } from "@/lib/courses/courses.functions";
@@ -20,21 +30,20 @@ import { themeInitScript, useSettings, writeLocaleCookie } from "@/lib/settings"
 function NotFoundComponent() {
   const t = messagesFor(useSettings().locale);
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">{t.pageMissingTitle}</h2>
-        <p className="mt-2 text-sm text-muted-foreground">{t.pageMissingBody}</p>
-        <div className="mt-6">
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            {t.goHome}
-          </Link>
-        </div>
-      </div>
-    </div>
+    <Empty className="min-h-screen">
+      <EmptyHeader>
+        <EmptyMedia className="font-display text-7xl leading-none text-primary">404</EmptyMedia>
+        <EmptyTitle className="font-display text-2xl">
+          <h1>{t.pageMissingTitle}</h1>
+        </EmptyTitle>
+        <EmptyDescription>{t.pageMissingBody}</EmptyDescription>
+      </EmptyHeader>
+      <EmptyContent>
+        <Button asChild>
+          <Link to="/">{t.goHome}</Link>
+        </Button>
+      </EmptyContent>
+    </Empty>
   );
 }
 
@@ -44,29 +53,30 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
   const t = messagesFor(useSettings().locale);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">{t.pageErrorTitle}</h1>
-        <p className="mt-2 text-sm text-muted-foreground">{t.pageErrorBody}</p>
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
-          <button
-            onClick={() => {
-              router.invalidate();
-              reset();
-            }}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            {t.tryAgain}
-          </button>
-          <a
-            href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
-          >
-            {t.goHome}
-          </a>
-        </div>
-      </div>
-    </div>
+    <Empty className="min-h-screen">
+      <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <TriangleAlert />
+        </EmptyMedia>
+        <EmptyTitle className="font-display text-2xl">
+          <h1>{t.pageErrorTitle}</h1>
+        </EmptyTitle>
+        <EmptyDescription>{t.pageErrorBody}</EmptyDescription>
+      </EmptyHeader>
+      <EmptyContent className="flex-row flex-wrap justify-center gap-2">
+        <Button
+          onClick={() => {
+            router.invalidate();
+            reset();
+          }}
+        >
+          {t.tryAgain}
+        </Button>
+        <Button asChild variant="outline">
+          <a href="/">{t.goHome}</a>
+        </Button>
+      </EmptyContent>
+    </Empty>
   );
 }
 

@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, useParams } from "@tanstack/react-router";
 import { ArrowLeft, BookOpen, Check, ChevronRight, Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Kbd } from "@/components/ui/kbd";
+import { Progress } from "@/components/ui/progress";
 import {
   SidebarContent,
   SidebarGroup,
@@ -158,13 +162,16 @@ export function CourseSidebar() {
     <>
       <SidebarHeader className="gap-3 p-3 group-data-[collapsible=icon]:p-2">
         <div className="flex items-center justify-between gap-2 group-data-[collapsible=icon]:justify-center">
-          <Link
-            to="/"
-            onClick={closeMobile}
-            className="inline-flex items-center gap-1.5 rounded-md px-1 py-1 text-xs text-sidebar-foreground/60 transition-colors hover:text-sidebar-foreground group-data-[collapsible=icon]:hidden"
+          <Button
+            asChild
+            variant="ghost"
+            size="sm"
+            className="h-7 gap-1.5 px-1.5 text-xs font-normal text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:hidden [&_svg]:size-3.5"
           >
-            <ArrowLeft className="size-3.5" /> {t.allSections}
-          </Link>
+            <Link to="/" onClick={closeMobile}>
+              <ArrowLeft /> {t.allSections}
+            </Link>
+          </Button>
           <SidebarTrigger
             aria-label={t.toggleMenu}
             title={`${t.toggleMenu} (${mod}+B)`}
@@ -199,9 +206,9 @@ export function CourseSidebar() {
             aria-label={t.searchCourse}
             className="h-9 border-sidebar-border bg-sidebar-accent/40 pr-14 pl-8 text-sidebar-foreground placeholder:text-sidebar-foreground/40"
           />
-          <kbd className="pointer-events-none absolute top-1/2 right-2 hidden -translate-y-1/2 rounded border border-sidebar-border px-1.5 py-0.5 font-mono text-[10px] text-sidebar-foreground/50 lg:block">
+          <Kbd className="absolute top-1/2 right-2 hidden -translate-y-1/2 border border-sidebar-border bg-sidebar text-[10px] text-sidebar-foreground/50 lg:inline-flex">
             {mod} K
-          </kbd>
+          </Kbd>
         </div>
 
         <SidebarMenu className="hidden group-data-[collapsible=icon]:flex">
@@ -249,14 +256,11 @@ export function CourseSidebar() {
                   <div className="min-w-0 flex-1 group-data-[collapsible=icon]:sr-only">
                     <span className="block leading-snug">{g.title}</span>
                     <span className="mt-1 flex items-center gap-2 text-[11px] text-sidebar-foreground/55">
-                      <span className="h-1 w-14 overflow-hidden rounded-full bg-sidebar-border">
-                        <span
-                          className="block h-full rounded-full bg-sidebar-primary transition-all"
-                          style={{
-                            width: `${g.lessons.length ? (groupDone / g.lessons.length) * 100 : 0}%`,
-                          }}
-                        />
-                      </span>
+                      <Progress
+                        value={g.lessons.length ? (groupDone / g.lessons.length) * 100 : 0}
+                        aria-hidden
+                        className="h-1 w-14 bg-sidebar-border *:bg-sidebar-primary"
+                      />
                       <span className="tabular-nums">
                         {groupDone}/{g.lessons.length}
                       </span>
@@ -321,26 +325,16 @@ export function CourseSidebar() {
                           const isActive = l.id === lessonId;
                           return (
                             <SidebarMenuSubItem key={l.id} className="relative">
-                              <button
-                                type="button"
-                                onClick={() => toggle(l.id)}
+                              <Checkbox
+                                checked={isDone}
+                                onCheckedChange={() => toggle(l.id)}
                                 aria-label={isDone ? t.markNotDone : t.markDone}
-                                aria-pressed={isDone}
                                 className={cn(
-                                  "absolute top-[7px] left-0 z-10 grid size-4 cursor-pointer place-items-center rounded-full border transition-colors after:absolute after:-inset-1.5",
-                                  isDone
-                                    ? "border-success bg-success text-success-foreground"
-                                    : isActive
-                                      ? "border-sidebar-primary bg-sidebar"
-                                      : "border-sidebar-foreground/30 bg-sidebar text-transparent hover:border-sidebar-foreground/70 hover:text-sidebar-foreground/70",
+                                  "absolute top-[7px] left-0 z-10 size-4 rounded-full border-sidebar-foreground/30 bg-sidebar shadow-none transition-colors after:absolute after:-inset-1.5 hover:border-sidebar-foreground/70 data-[state=checked]:border-success data-[state=checked]:bg-success data-[state=checked]:text-success-foreground [&_svg]:size-2.5 [&_svg]:stroke-[3.5]",
+                                  isActive &&
+                                    "border-sidebar-primary before:absolute before:inset-0 before:m-auto before:size-1.5 before:rounded-full before:bg-sidebar-primary data-[state=checked]:before:hidden",
                                 )}
-                              >
-                                {isActive && !isDone ? (
-                                  <span className="size-1.5 rounded-full bg-sidebar-primary" />
-                                ) : (
-                                  <Check className="size-2.5" strokeWidth={3.5} />
-                                )}
-                              </button>
+                              />
                               <SidebarMenuSubButton
                                 asChild
                                 isActive={isActive}

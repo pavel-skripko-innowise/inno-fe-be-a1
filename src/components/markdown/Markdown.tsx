@@ -5,9 +5,18 @@ import rehypeSlug from "rehype-slug";
 import rehypeHighlight from "rehype-highlight";
 import { Link } from "@tanstack/react-router";
 import { Check, Copy, ExternalLink } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { resolveLink } from "@/lib/courses/links";
 import type { LinkIndex } from "@/lib/courses/types";
 import { useI18n } from "@/lib/locale";
+import { CodeBarButton } from "./CodeBarButton";
 import { MermaidDiagram } from "./MermaidDiagram";
 
 const LANG_LABEL: Record<string, string> = {
@@ -57,10 +66,10 @@ function CodeBlock({ children }: { children?: ReactNode }) {
     <div className="code-block">
       <div className="code-block__bar">
         <span>{lang ? (LANG_LABEL[lang] ?? lang) : t.code}</span>
-        <button type="button" onClick={copy} aria-label={t.copyCode}>
-          {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+        <CodeBarButton onClick={copy} aria-label={t.copyCode}>
+          {copied ? <Check /> : <Copy />}
           {copied ? t.copied : t.copy}
-        </button>
+        </CodeBarButton>
       </div>
       <pre ref={ref}>{children}</pre>
     </div>
@@ -83,11 +92,18 @@ export function Markdown({ markdown, path, linkIndex }: Props) {
   const { t } = useI18n();
   const components: Components = {
     pre: ({ children }) => <CodeBlock>{children}</CodeBlock>,
-    table: ({ children }) => (
-      <div className="table-wrap">
-        <table>{children}</table>
+    table: ({ node: _node, ...props }) => (
+      <div className="my-6 overflow-hidden rounded-lg border">
+        <Table {...props} className="text-[0.95rem]" />
       </div>
     ),
+    thead: ({ node: _node, ...props }) => <TableHeader {...props} className="bg-secondary" />,
+    tbody: ({ node: _node, ...props }) => <TableBody {...props} />,
+    tr: ({ node: _node, ...props }) => <TableRow {...props} />,
+    th: ({ node: _node, ...props }) => (
+      <TableHead {...props} className="h-auto px-3.5 py-2.5 font-semibold text-foreground" />
+    ),
+    td: ({ node: _node, ...props }) => <TableCell {...props} className="px-3.5 py-2.5 align-top" />,
     a: ({ href = "", children }) => {
       const link = resolveLink(href, path, linkIndex);
       switch (link.kind) {
