@@ -7,7 +7,12 @@ export type Messages = {
   catalogDescription: string;
   catalogEmpty: string;
   sectionEmpty: string;
-  courseStats: (modules: number, lessons: number) => string;
+  modulesCount: (count: number) => string;
+  lessonsCount: (count: number) => string;
+  continueLearning: string;
+  continueAction: string;
+  startAction: string;
+  courseDone: string;
   allSections: string;
   progress: string;
   lessonsDone: (done: number, total: number) => string;
@@ -70,6 +75,15 @@ export type Messages = {
   tryAgain: string;
 };
 
+function ruPlural(count: number, one: string, few: string, many: string) {
+  const tens = count % 100;
+  const units = count % 10;
+  if (tens >= 11 && tens <= 14) return many;
+  if (units === 1) return one;
+  if (units >= 2 && units <= 4) return few;
+  return many;
+}
+
 const ru: Messages = {
   siteTitle: "Курсы для сотрудников",
   siteDescription: "Удобный просмотр обучающих материалов",
@@ -79,7 +93,12 @@ const ru: Messages = {
   catalogDescription: "Разделы обучающих курсов для сотрудников команды.",
   catalogEmpty: "Разделы не найдены. Добавьте папку раздела с config.json в каталог контента.",
   sectionEmpty: "В этом разделе пока нет курсов.",
-  courseStats: (modules, lessons) => `${modules} мод. · ${lessons} уроков`,
+  modulesCount: (count) => `${count} ${ruPlural(count, "модуль", "модуля", "модулей")}`,
+  lessonsCount: (count) => `${count} ${ruPlural(count, "урок", "урока", "уроков")}`,
+  continueLearning: "Продолжить обучение",
+  continueAction: "Продолжить",
+  startAction: "Начать",
+  courseDone: "Пройден",
   allSections: "Все разделы",
   progress: "Прогресс",
   lessonsDone: (done, total) => `Пройдено ${done} из ${total}`,
@@ -152,7 +171,12 @@ const en: Messages = {
   catalogEmpty:
     "No sections found. Add a section folder with config.json to the content directory.",
   sectionEmpty: "This section has no courses yet.",
-  courseStats: (modules, lessons) => `${modules} mod. · ${lessons} lessons`,
+  modulesCount: (count) => `${count} ${count === 1 ? "module" : "modules"}`,
+  lessonsCount: (count) => `${count} ${count === 1 ? "lesson" : "lessons"}`,
+  continueLearning: "Continue learning",
+  continueAction: "Continue",
+  startAction: "Start",
+  courseDone: "Completed",
   allSections: "All sections",
   progress: "Progress",
   lessonsDone: (done, total) => `${done} of ${total} done`,

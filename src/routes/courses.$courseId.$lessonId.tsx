@@ -10,6 +10,7 @@ import { Markdown } from "@/components/markdown/Markdown";
 import { TableOfContents } from "@/components/course/TableOfContents";
 import { useCourse } from "@/components/course/CourseContext";
 import { courseQuery, resolveLocale } from "@/lib/courses/courses.functions";
+import { rememberLesson } from "@/lib/courses/progress";
 import { flattenLessons } from "@/lib/courses/types";
 import { messagesFor } from "@/lib/i18n";
 import { useI18n } from "@/lib/locale";
@@ -107,6 +108,8 @@ function LessonPage() {
   const isDone = done.has(lessonId);
   const { rememberPosition } = useSettings();
   useScrollMemory(`${locale}/${course.id}/${lessonId}`, "lesson", rememberPosition);
+
+  useEffect(() => rememberLesson(course.id, lessonId), [course.id, lessonId]);
 
   // Arrow keys switch lessons (ignored while typing).
   useEffect(() => {

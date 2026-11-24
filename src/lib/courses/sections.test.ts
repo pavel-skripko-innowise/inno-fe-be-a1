@@ -14,8 +14,7 @@ const summary = (id: string, sectionId: string): CourseSummary => ({
   title: id,
   description: "",
   moduleCount: 1,
-  lessonCount: 1,
-  firstLessonId: "intro",
+  lessons: [{ id: "intro", number: "0.0", title: "Intro" }],
 });
 
 describe("splitContentLocale", () => {

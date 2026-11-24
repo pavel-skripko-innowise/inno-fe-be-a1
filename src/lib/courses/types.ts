@@ -34,14 +34,16 @@ export type Course = {
   modules: CourseModule[];
 };
 
+export type LessonRef = Pick<Lesson, "id" | "number" | "title">;
+
 export type CourseSummary = {
   id: string;
   sectionId: string;
   title: string;
   description: string;
   moduleCount: number;
-  lessonCount: number;
-  firstLessonId: string | null;
+  /** All lessons in reading order, without their markdown. */
+  lessons: LessonRef[];
 };
 
 export type Section = SectionMeta & { courses: CourseSummary[] };

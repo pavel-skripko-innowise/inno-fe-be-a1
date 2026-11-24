@@ -58,8 +58,7 @@ export const getCatalog = createServerFn({ method: "GET" })
             title: course.title,
             description: course.description,
             moduleCount: course.modules.length,
-            lessonCount: lessons.length,
-            firstLessonId: lessons[0]?.id ?? null,
+            lessons: lessons.map(({ id, number, title }) => ({ id, number, title })),
           };
         }),
     };
