@@ -10,6 +10,7 @@ export type Messages = {
   courseStats: (modules: number, lessons: number) => string;
   allSections: string;
   progress: string;
+  lessonsDone: (done: number, total: number) => string;
   searchCourse: string;
   nothingFound: string;
   markDone: string;
@@ -37,6 +38,8 @@ export type Messages = {
   moduleMissing: string;
   openMenu: string;
   courseNav: string;
+  toggleMenu: string;
+  toggleLessons: string;
   coursesBrand: string;
   settings: string;
   theme: string;
@@ -79,6 +82,7 @@ const ru: Messages = {
   courseStats: (modules, lessons) => `${modules} мод. · ${lessons} уроков`,
   allSections: "Все разделы",
   progress: "Прогресс",
+  lessonsDone: (done, total) => `Пройдено ${done} из ${total}`,
   searchCourse: "Поиск по курсу",
   nothingFound: "Ничего не найдено",
   markDone: "Отметить пройденным",
@@ -106,6 +110,8 @@ const ru: Messages = {
   moduleMissing: "Модуль не найден.",
   openMenu: "Открыть меню",
   courseNav: "Навигация по курсу",
+  toggleMenu: "Свернуть или развернуть меню",
+  toggleLessons: "Показать или скрыть уроки",
   coursesBrand: "Курсы",
   settings: "Настройки",
   theme: "Тема",
@@ -149,6 +155,7 @@ const en: Messages = {
   courseStats: (modules, lessons) => `${modules} mod. · ${lessons} lessons`,
   allSections: "All sections",
   progress: "Progress",
+  lessonsDone: (done, total) => `${done} of ${total} done`,
   searchCourse: "Search the course",
   nothingFound: "Nothing found",
   markDone: "Mark as done",
@@ -176,6 +183,8 @@ const en: Messages = {
   moduleMissing: "Module not found.",
   openMenu: "Open menu",
   courseNav: "Course navigation",
+  toggleMenu: "Collapse or expand the menu",
+  toggleLessons: "Show or hide lessons",
   coursesBrand: "Courses",
   settings: "Settings",
   theme: "Theme",

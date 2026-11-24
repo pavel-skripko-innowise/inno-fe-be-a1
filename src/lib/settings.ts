@@ -1,4 +1,6 @@
 import { useSyncExternalStore } from "react";
+import { createIsomorphicFn } from "@tanstack/react-start";
+import { getCookie } from "@tanstack/react-start/server";
 
 /** User preferences stored in the browser (localStorage). */
 export type Theme = "light" | "dark";
@@ -41,6 +43,19 @@ export function writeLocaleCookie(locale: string) {
   if (typeof document === "undefined") return;
   document.cookie = `locale=${encodeURIComponent(locale)}; Path=/; Max-Age=31536000; SameSite=Lax`;
 }
+
+// Written by SidebarProvider (components/ui/sidebar.tsx); read on the server too so a collapsed menu renders collapsed.
+const SIDEBAR_COOKIE = "sidebar_state";
+
+export const readSidebarOpen = createIsomorphicFn()
+  .server(() => {
+    try {
+      return getCookie(SIDEBAR_COOKIE) !== "false";
+    } catch {
+      return true;
+    }
+  })
+  .client(() => !document.cookie.split("; ").includes(`${SIDEBAR_COOKIE}=false`));
 
 export function updateSettings(patch: Partial<Settings>) {
   cache = normalize({ ...read(), ...patch });
