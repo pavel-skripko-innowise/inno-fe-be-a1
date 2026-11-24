@@ -189,14 +189,13 @@ function CourseCard({ course, lastLessonId, done }: CardProps) {
     <Card className="relative flex h-full flex-col shadow-card transition-all hover:-translate-y-0.5 hover:border-primary has-[[data-card-link]:focus-visible]:ring-2 has-[[data-card-link]:focus-visible]:ring-ring">
       <CardHeader className="flex-1">
         <div className="flex items-start justify-between gap-3">
-          <BookOpen className="size-6 text-primary" />
           {total > 0 && doneCount === total && (
             <Badge className="gap-1 border-transparent bg-success text-success-foreground shadow-none hover:bg-success">
               <Check className="size-3" strokeWidth={3} /> {t.courseDone}
             </Badge>
           )}
         </div>
-        <CardTitle className="pt-2.5 font-display text-2xl leading-snug font-medium tracking-normal">
+        <CardTitle className="font-display text-2xl leading-snug font-medium tracking-normal">
           <h3>
             <Link
               to="/courses/$courseId"
